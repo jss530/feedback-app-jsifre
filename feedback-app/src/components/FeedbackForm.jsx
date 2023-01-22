@@ -1,13 +1,28 @@
-import { useState } from 'react';
+import { useState, useContext, useEffect } from 'react';
 import Card from "./shared/Card";
 import Button from './shared/Button';
 import RatingSelect from './RatingSelect';
+import FeedbackContext from '../context/FeedbackContext';
 
-function FeedbackForm({ handleAdd }) {
+
+function FeedbackForm() {
     const [text, setText] = useState('');
     const [rating, setRating] = useState(10);
     const [btnDisabled, setBtnDisabled] = useState(true);
     const [message, setMessage] = useState('');
+
+    const { addFeedback, feedbackEdit, updateFeedback } = useContext(FeedbackContext);
+
+    //useEffect takes an array of dependencies, where you can list the items you want it to watch for changes to in order to run
+    //use this function alot for Fetch requests on page load.
+
+    useEffect(() => {
+        if (feedbackEdit.edit === true) {
+            setBtnDisabled(false);
+            setText(feedbackEdit.item.text);
+            setRating(feedbackEdit.item.rating);
+        }
+    }, [feedbackEdit])
 
 // make sure that the input is at least 10 characters after whitespace is removed
     const handleTextChange = (e) => {
@@ -32,7 +47,12 @@ function FeedbackForm({ handleAdd }) {
                 text,
                 rating
             }
-            handleAdd(newFeedback);
+
+            if (feedbackEdit.edit === true) {
+                updateFeedback(feedbackEdit.item.id, newFeedback);
+            } else {
+                addFeedback(newFeedback);
+            }
 
             setText('');
         }
